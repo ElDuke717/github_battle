@@ -12,5 +12,4 @@ You can view the final project at **[github-battle.ui.dev](http://github-battle.
 
 ### Branches
 
-Every (Project) video in the course coincides with a branch. If you get stuck, you can checkout the branch for that video.
-# github_battle
+

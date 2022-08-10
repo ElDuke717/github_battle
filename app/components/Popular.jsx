@@ -1,4 +1,6 @@
 import * as React from "react";
+import Proptypes from 'prop-types';
+import { fetchPopularRepos } from "../utils/api";
 
 function LanguagesNav({ selected, onUpdateLanguage }) {
     const languages = ["All", "JavaScript", "Ruby", "Java", "CSS", "Python"];
@@ -17,23 +19,54 @@ function LanguagesNav({ selected, onUpdateLanguage }) {
     );
 }
 
+LanguagesNav.propTypes = {
+    selected: Proptypes.string.isRequired,
+    onUpdateLanguage: Proptypes.func.isRequired
+}
+
 export default class Popular extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
             selectedLanguage: "All",
+            repos: null,
+            error: null,
         };
 
         this.updateLanguage = this.updateLanguage.bind(this);
+        this.isLoading = this.isLoading.bind(this);
+    }
+    componentDidMount() {
+        this.updateLanguage(this.state.selectedLanguage);
     }
     updateLanguage(selectedLanguage) {
         this.setState({
             selectedLanguage,
+            error: null,
+            repos: null
         });
+
+        fetchPopularRepos(selectedLanguage)
+            .then((repos) =>
+                this.setState({
+                    repos,
+                    error: null
+                }))
+            .catch(() => {
+                console.warn('Error fetching repos: ', error)
+            })
+
+        this.setState({
+            error: `There was an error fetching the repositories.`
+        })
+    }
+
+    isLoading() {
+        return this.state.repos === null && this.state.error === null;
     }
     render() {
-        const { selectedLanguage } = this.state;
+        const { selectedLanguage, repos, error } = this.state;
 
         return (
             <main>
@@ -41,7 +74,9 @@ export default class Popular extends React.Component {
                     selected={selectedLanguage}
                     onUpdateLanguage={this.updateLanguage}
                 />
-                {/* {JSON.stringify(this.state, null, 2)} */}
+                {this.isLoading() && <p>LOADING</p>}
+                {error && <p>{error}</p>}
+                {repos && <pre>{JSON.stringify(repos, null, 2)}</pre>}
             </main>
         );
     }
